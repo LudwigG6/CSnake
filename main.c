@@ -44,6 +44,11 @@ typedef struct{
     int Y;
 }Snake;
 
+typedef struct{
+    int X;
+    int Y;
+}Food;
+
 
 #define clrscr() printf("\e[1;1H\e[2J")
 void gotoxy(int x,int y){
@@ -51,6 +56,12 @@ void gotoxy(int x,int y){
 }
 
 
+void placeFood(Food *food, Snake snake){
+    do{
+        food->X = rand() % COLS + 2;
+        food->Y = rand() % ROWS + 2;
+    }while(food->X == snake.X && food->Y == snake.Y);
+}
 
 void drawBoundaries(){
     for(int row = 0; row < ROWS+2;row++){
@@ -71,6 +82,11 @@ void drawBoundaries(){
 void drawSnake(Snake snake){
     gotoxy(snake.X,snake.Y);
     printf("O");
+}
+
+void drawFood(Food food){
+    gotoxy(food.X,food.Y);
+    printf("*");
 }
 
 void clearSnake(Snake snake){
@@ -94,10 +110,14 @@ int kbhit2()
 
 int getNextKeyboardAction(){
     if(kbhit2()){
-        //gotoxy(0,ROWS+3);
-        //printf("Ange vad den ska göra:");
         char ch = getch();
-        //printf("%d",ch);
+        if(ch == 224 || ch == 0){
+            ch = getch();
+            if(ch == 72) return 'u';
+            if(ch == 80) return 'd';
+            if(ch == 75) return 'l';
+            if(ch == 77) return 'r';
+        }
         return ch;
     }
     return 0;
@@ -127,12 +147,24 @@ void moveSnake(Snake *snake,KeyboardDir direction){
 }
 
 int main(){
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     Snake snake;
     snake.X = 5; 
     snake.Y = 5;
+    
+    Food food;
+    food.X = 10;
+    food.Y = 5;
+
+    srand(time(NULL));
+    placeFood(&food, snake);
+
     clrscr();
     hideCursor();
     drawBoundaries();
+    drawFood(food);
+    
     while(1){
         //clrscr();
         //drawBoundaries(1);
@@ -143,9 +175,12 @@ int main(){
         else if(ch == 'd') moveSnake(&snake,KeyboardDir_Down);
         else if(ch == 'l') moveSnake(&snake,KeyboardDir_Left);
         else if(ch == 'r') moveSnake(&snake,KeyboardDir_Right);
+        if(snake.X == food.X && snake.Y == food.Y){
+            placeFood(&food, snake);
+        }
         drawSnake(snake);
+        drawFood(food);
         msleep(250);
     }
     return 1;
 }
-
