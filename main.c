@@ -132,7 +132,7 @@ int main(){
     snake.Y = 5;
     clrscr();
     hideCursor();
-    drawBoundaries(1);
+    drawBoundaries();
     while(1){
         //clrscr();
         //drawBoundaries(1);
